@@ -1,0 +1,44 @@
+============
+ libminictk
+============
+
+ Mini C Tk - Minimalistic C ToolKit
+
+ 0. License
+
+This library is avaible under the LGPL license which can
+be found in the file LICENSE included among the files for
+this library.
+
+
+ 1. Compile time requirements:
+
+GCC - Gnu C Compiler
+MAKE - For the Makefile
+AR - Archiver (Should be included with gcc)
+
+
+ 2. Functionallity
+
+ * Simple memory allocation monitoring
+ * Mathematical structures
+ * Vector operations
+ * Matrix operations
+
+
+ 3. Usage
+
+Compitation:
+> make
+
+Installation
+(Run as root)
+> make install
+Ubuntu-based distros: > sudo make install
+
+Project cleaning:
+> make clean
+
+Recompiling entire project
+> make re
+
