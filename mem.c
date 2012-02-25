@@ -1,5 +1,5 @@
 #include "mem.h"
-#include "minictk.h"
+#include "main.h"
 #include <stdlib.h>
 #include <stdint.h>
 
