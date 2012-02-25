@@ -1,5 +1,6 @@
-#include "minictk.h"
+#include "main.h"
 #include "mem.h"
+#include "config.h"
 #include <stdio.h>
 
 static minictk_sig_t sigfunc;
@@ -17,13 +18,18 @@ void minictk_stop()
 
 void minictk_signal(minictk_sig_t sig)
 {
+	sigfunc = sig;
 }
 
 void minictk_signal_call(int code, mctk_sigdata_t data)
 {
 	if (sigfunc != NULL) {
-		sigfunc(code);
+		sigfunc(code, data);
 	}
 }
 
+const char *minictk_version()
+{
+	return VERSION;
+}
 
