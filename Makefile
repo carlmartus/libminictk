@@ -3,7 +3,7 @@ LIBFILE=lib$(LIBNAME).a
 LIBHEAD=minictk.h
 
 CC=cc
-CFLAGS=-Wall -O2 -g3
+CFLAGS=-Wall -O2
 DOCDIR=doc
 
 _OBJ=main mem vectors dbuf observer

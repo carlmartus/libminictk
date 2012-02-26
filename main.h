@@ -7,6 +7,7 @@ enum {
 	MCTK_SIG_MEMORY_LEAK,
 	MCTK_SIG_MEMORY_FULL,
 	MCTK_SIG_OBSERVER_FULL,
+	MCTK_SIG_COUNT,
 };
 
 typedef union {
@@ -14,6 +15,7 @@ typedef union {
 		uint32_t amount;
 		uint32_t size;
 	} leak;
+	void *observer_ptr;
 } mctk_sigdata_t;
 
 typedef void(*minictk_sig_t)(int, mctk_sigdata_t);

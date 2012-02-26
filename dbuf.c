@@ -50,6 +50,30 @@ void *dbuf_reserve(dbuf_t *db, uint32_t size)
 {
 	void *ptr = db->data + db->size;
 	reserve(db, db->size + size);
+	db->size += size;
 	return ptr;
+}
+
+inline uint32_t dbuf_offset(dbuf_t *db, void *ptr)
+{
+	return (uint32_t) (ptr - db->data);
+}
+
+inline void *dbuf_retrive(dbuf_t *db, uint32_t offset)
+{
+	return db->data + offset;
+}
+
+dbuf_ptr_t dbuf_get_definite(dbuf_t *db, void *ptr)
+{
+	dbuf_ptr_t dp;
+	dp.db = db;
+	dp.offset = ptr - db->data;
+	return dp;
+}
+
+void *dbuf_ptr_retrive(dbuf_ptr_t dp)
+{
+	return dp.db->data + dp.offset;
 }
 

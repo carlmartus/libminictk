@@ -10,6 +10,7 @@ void obs_reset(observer_t *o, uint16_t max)
 static void full(observer_t *o)
 {
 	mctk_sigdata_t sig;
+	sig.observer_ptr = o;
 	minictk_signal_call(MCTK_SIG_OBSERVER_FULL, sig);
 }
 
@@ -18,6 +19,7 @@ void obs_register(observer_t *o, obs_func_t func)
 	obs_bind_t bind;
 	if (o->count >= o->max) {
 		full(o);
+		return;
 	}
 
 	bind.func = func;

@@ -21,7 +21,7 @@
  * - @ref page_main
  * - @ref page_mem
  * - @ref page_vectors
- * - @ref page_module
+ * - @ref page_observer
  */
 
 
@@ -38,6 +38,8 @@ enum {
 	MCTK_SIG_NONE=0,		/**< Empty callback code */
 	MCTK_SIG_MEMORY_LEAK,	/**< Memory leakage detected callback code */
 	MCTK_SIG_MEMORY_FULL,	/**< Cannot perform allocation */
+	MCTK_SIG_OBSERVER_FULL,	/**< No room for further callbacks in observer */
+	MCTK_SIG_COUNT,			/**< @private */
 };
 
 /**
@@ -50,6 +52,7 @@ typedef union {
 		uint32_t amount;	/**< Allocation count */
 		uint32_t size;		/**< Sum of active allocation */
 	} leak;
+	void *observer_ptr;		/**< Observer pointer */
 } mctk_sigdata_t;
 
 /**
@@ -179,10 +182,20 @@ uint32_t mem_free(void *ptr);
 // structs.h - Datastructures
 // ==========================
 
+/**
+ * @defgroup structs Data structures
+ * @{
+ */
+
 typedef struct {
-	uint32_t size;
-	uint32_t alloc;
+	uint32_t size, alloc;
+	void *data;
 } dbuf_t;
+
+typedef struct {
+	dbuf_t *db;
+	uint32_t offset;
+} dbuf_ptr_t;
 
 /**
  * Initialize structure for usage.
@@ -196,6 +209,90 @@ void dbuf_create(dbuf_t *db, uint32_t init_size);
  * @param db Instance
  */
 void dbuf_destroy(dbuf_t *db);
+
+/**
+ * Pack data into dynamic buffer
+ * @param ptr Data to pack
+ * @param size Size of data to pack
+ * @return Pointer of data placement in buffer
+ */
+void *dbuf_pack(dbuf_t *db, void *ptr, uint32_t size);
+
+/**
+ * Reserve block of memmory in buffer
+ * @param size Size of block to reserve
+ * @return Pointer to reserved block
+ */
+void *dbuf_reserve(dbuf_t *db, uint32_t size);
+
+/**
+ * Retrive buffer offset from pointer in dynamic buffer
+ * @param ptr Pointer towards buffer to be converted
+ * @return Offset, works a safer pointer in buffer
+ */
+inline uint32_t dbuf_offset(dbuf_t *db, void *ptr);
+
+/**
+ * Convert offset to a real pointer
+ * @param offset Offset pointer to be converted
+ * @return Real pointer to data in buffer
+ */
+inline void *dbuf_retrive(dbuf_t *db, uint32_t offset);
+
+/**
+ * Get definite pointer of data in buffer. Since the buffer
+ * is dynamic and can grow by performing reallocations it
+ * is never safe to have a direct pointer to data in buffer
+ * between insertions.
+ * @param ptr Pointer inside of buffer
+ * @return Dynamic buffer pointer object. Can be converted to pointer
+ * @so dbuf_ptr_retrive
+ */
+dbuf_ptr_t dbuf_get_definite(dbuf_t *db, void *ptr);
+
+/**
+ * Convert a dbuf_ptr_retrive into a real pointer.
+ * @param dp Indirect pointer to be converted
+ */
+void *dbuf_ptr_retrive(dbuf_ptr_t dp);
+
+/**
+ * @page page_dbuf Dynamic buffer
+ * Data structure working as a dynamicaly growing buffer.
+ * The structures takes data into a block of memory. If a
+ * buffer overflow is about to occure, the block of memory
+ * will grow to fit the inserted data.
+ * The growing is done by performing a reallocation.
+ * Only one memory allocation is done in dbuf_create.
+ *
+ * @code
+ * #include <minictk.h>
+ * #include <string.h>
+ * #include <assert.h>
+ * #include <stdio.h>
+ *
+ * int main(int argc, char **argv)
+ * {
+ * 	dbuf_t db;
+ * 	char msg[] = "Hello Dynamic buffer!";
+ * 	char *in_buffer;
+ *
+ * 	dbuf_create(&db, 500); // New buffer with 500 b as initial allocation
+ * 	in_buffer = dbuf_pack(&db, msg, strlen(msg)+1); // +1 for the strings trailing 0
+ * 	dbuf_destroy(&db); // Free buffer and block of memory
+ * 	assert(in_buffer != msg);
+ * 	printf("%s\n%s\n", msg, in_buffer);
+ * 	return 0;
+ * }
+ * @endcode
+ * This will produce:
+ * @verbatim
+Hello Dynamic buffer!
+Hello Dynamic buffer!
+@endverbatim
+ */
+
+/*@}*/
 
 
 
@@ -316,7 +413,7 @@ void obs_unregister(observer_t *o, obs_func_t func);
 void obs_trigger(observer_t *o, void *data);
 
 /**
- * @page page_module Modularity support
+ * @page page_observer Observer
  *
  * The observer type does not require a proper library startup
  * (minictk_start).
