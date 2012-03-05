@@ -1,6 +1,6 @@
 CC=cc
 FLAGS=-Wall -O2 -lminictk
-EXES=observer1
+EXES=dbuf1 observer1 ptree1
 
 .PHONY: all clean
 

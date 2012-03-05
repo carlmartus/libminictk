@@ -1,12 +1,13 @@
 LIBNAME=minictk
-LIBFILE=lib$(LIBNAME).a
+#LIBFILE=lib$(LIBNAME).a
+LIBFILE=lib$(LIBNAME).so
 LIBHEAD=minictk.h
 
 CC=cc
-CFLAGS=-Wall -O2
+CFLAGS=-Wall -O2 -fPIC -g3
 DOCDIR=doc
 
-_OBJ=main mem vectors dbuf observer
+_OBJ=main mem vectors dbuf observer ptree
 ODIR=obj
 OBJ=$(_OBJ:%=$(ODIR)/%.o)
 
@@ -19,9 +20,7 @@ all: $(LIBFILE)
 
 $(LIBFILE): $(OBJ)
 	ar -cvq $(LIBFILE) $(OBJ)
-
-info: $(LIBFILE)
-	ar -t $(LIBFILE)
+#$(CC) -shared -Wl,-soname,$(LIBFILE) -o $(LIBFILE) $^
 
 # ar -cvq libctest.a ctest1.o ctest2.o
 # List files in library: ar -t libctest.a

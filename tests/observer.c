@@ -13,7 +13,7 @@ static void cb_count(void *ptr)
 
 static void cb_empty(void *ptr) {}
 
-static void cb_sig(int sig)
+static void cb_sig(int sig, mctk_sigdata_t data)
 {
 	sig_count[sig]++;
 }

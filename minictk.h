@@ -21,6 +21,7 @@
  * - @ref page_main
  * - @ref page_mem
  * - @ref page_vectors
+ * - @ref page_ptree
  * - @ref page_observer
  */
 
@@ -58,7 +59,7 @@ typedef union {
 /**
  * Signal callback definition
  */
-typedef void(*minictk_sig_t)(int sig);
+typedef void(*minictk_sig_t)(int, mctk_sigdata_t);
 
 /**
  * Initialize library
@@ -192,6 +193,9 @@ typedef struct {
 	void *data;
 } dbuf_t;
 
+/**
+ * Dynamic Buffer data structure
+ */
 typedef struct {
 	dbuf_t *db;
 	uint32_t offset;
@@ -226,6 +230,11 @@ void *dbuf_pack(dbuf_t *db, void *ptr, uint32_t size);
 void *dbuf_reserve(dbuf_t *db, uint32_t size);
 
 /**
+ * Retrive pointer to data
+ */
+inline void *dbuf_data(dbuf_t *db);
+
+/**
  * Retrive buffer offset from pointer in dynamic buffer
  * @param ptr Pointer towards buffer to be converted
  * @return Offset, works a safer pointer in buffer
@@ -237,7 +246,7 @@ inline uint32_t dbuf_offset(dbuf_t *db, void *ptr);
  * @param offset Offset pointer to be converted
  * @return Real pointer to data in buffer
  */
-inline void *dbuf_retrive(dbuf_t *db, uint32_t offset);
+inline void *dbuf_get(dbuf_t *db, uint32_t offset);
 
 /**
  * Get definite pointer of data in buffer. Since the buffer
@@ -291,6 +300,123 @@ Hello Dynamic buffer!
 Hello Dynamic buffer!
 @endverbatim
  */
+
+
+// Packed Tree
+
+typedef int32_t (*pt_compare_t)(void*, void*);
+
+typedef struct {
+	uint32_t key, data;
+	uint32_t lt, gt;
+} pt_node_t;
+
+#define PTREE_ROOT 1
+
+/**
+ * Packed Tree data structure
+ */
+typedef struct {
+	uint8_t flags;
+	dbuf_t db;
+	pt_compare_t cmp;
+	pt_node_t root;
+} ptree_t;
+
+/**
+ * Packed Tree callback function for iterations
+ * @param key Item key pointer
+ * @param data Item data pointer
+ * @param param Pointer passed through ptree_iterate
+ */
+typedef void (*pt_callback_t) (void *key, void *data, void *param);
+
+/**
+ * Initialize a packed tree
+ * @param init_size Initial buffer allocation size
+ * @param cmp Compare function for sorting the tree. NULL/0 will assume the keys are strings
+ */
+void ptree_create(ptree_t *pt, uint32_t init_size, pt_compare_t cmp);
+
+/**
+ * Tear down packed tree
+ */
+void ptree_destroy(ptree_t *pt);
+
+/**
+ * Pack data into packed tree
+ * @param data Pointer to data
+ * @param dsize Size of data
+ * @param key Pointer to key
+ * @param ksize Size of key. 0 will assume the key is a string
+ */
+void ptree_pack(ptree_t *pt, void *data, uint32_t dsize, void *key, uint32_t ksize);
+
+/**
+ * Fetch item from tree by key
+ * @return Pointer to item data
+ */
+void *ptree_fetch(ptree_t *pt, void *key);
+
+/**
+ * Iterate with callback through tree in sorted order
+ * @param cb Callback function
+ * @param param Will be sent with callback
+ */
+void ptree_iterate(ptree_t *ptr, pt_callback_t cb, void *param);
+
+/**
+ * @page page_ptree Packed Tree
+ * Packed Tree is a datastructure for storing sorted data
+ * with a log(n) complexity lookup function.
+ *
+ * Strings will do good as keys and sorting but any type
+ * can be used.
+ * @code
+ * #include <minictk.h>
+ * #include <string.h>
+ * #include <stdio.h>
+ *
+ * static int compare(void *s0, void *s1)
+ * {
+ * 	 return strcmp(s0, s1);
+ * }
+ *
+ * static void callback(void *key, void *data, void *param)
+ * {
+ * 	 printf("Callback with item [%s] and data [%s].\n",
+ * 		(const char*) key,
+ * 		(const char*) data);
+ * }
+ *
+ * int main(int argc, char **argv)
+ * {
+ * 	 ptree_t pt;
+ * 	 ptree_create(&pt, 20, compare);
+ *
+ * 	 ptree_pack(&pt, "Data 3", 0, "Key 3", 0);
+ * 	 ptree_pack(&pt, "Data 2", 0, "Key 2", 0);
+ * 	 ptree_pack(&pt, "Data 4", 0, "Key 4", 0);
+ * 	 ptree_pack(&pt, "Data 1", 0, "Key 1", 0);
+ *
+ * 	 ptree_iterate(&pt, callback, "Hello");
+ * 	 printf("The data of key 3 is [%s]\n", (const char*) ptree_fetch(&pt, "Key 3"));
+ *
+ * 	 ptree_destroy(&pt);
+ * 	 return 0;
+ * }
+ * @endcode
+ *
+ * This will produce:
+ * @verbatim
+Callback with item [Key 1] and data [Data 1].
+Callback with item [Key 2] and data [Data 2].
+Callback with item [Key 3] and data [Data 3].
+Callback with item [Key 4] and data [Data 4].
+The data of key 3 is [Data 3]
+@endverbatim
+ */
+
 
 /*@}*/
 

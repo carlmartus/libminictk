@@ -1,7 +1,7 @@
 # Doxyfile 1.7.3
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = libminictk
-PROJECT_NUMBER         = 0.3
+PROJECT_NUMBER         = 0.4
 PROJECT_BRIEF          = "Minimalistic C ToolKit"
 
 # With the PROJECT_LOGO tag one can specify an logo or icon that is

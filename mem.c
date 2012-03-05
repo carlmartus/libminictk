@@ -7,7 +7,7 @@ typedef struct {
 	uint32_t size;
 } prefix_t;
 
-static uint32_t active, sumsize;
+static int32_t active, sumsize;
 
 void mem_start()
 {
@@ -42,10 +42,15 @@ void *mem_malloc(uint32_t size)
 
 void *mem_realloc(void *ptr, uint32_t new_size)
 {
+	prefix_t *pre;
 	new_size += sizeof(prefix_t);
 	ptr = realloc(ptr-sizeof(prefix_t), new_size);
-	((prefix_t*) ptr)->size = new_size;
-	return ptr + sizeof(prefix_t);
+	pre = (prefix_t*) ptr;
+
+	sumsize -= pre->size;
+	pre->size = new_size;
+	sumsize += pre->size;
+	return pre + 1;
 }
 
 uint32_t mem_size(void *ptr)
@@ -60,6 +65,9 @@ uint32_t mem_free(void *ptr)
 	ptr -= sizeof(prefix_t);
 	size = ((prefix_t*) ptr)->size;
 	free(ptr);
+
+	active--;
+	sumsize -= ((prefix_t*) ptr)->size;
 	return size;
 }
 

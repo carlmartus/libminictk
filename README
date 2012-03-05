@@ -1,5 +1,5 @@
 ===============
- libminictk 0.3
+ libminictk 0.4
 ===============
 
  Mini C Tk - Minimalistic C ToolKit
@@ -24,6 +24,9 @@ AR - Archiver (Should be included with gcc)
  * Linear algebra mathematics
   - Vector operations
   - Matrix operations
+ * Data structures
+  - Dynamically growing buffer
+  - Binary search tree
  * Modules support system
   - Observers
 

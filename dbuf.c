@@ -46,6 +46,11 @@ void *dbuf_pack(dbuf_t *db, void *ptr, uint32_t size)
 	return dst;
 }
 
+inline void *dbuf_data(dbuf_t *db)
+{
+	return db->data;
+}
+
 void *dbuf_reserve(dbuf_t *db, uint32_t size)
 {
 	void *ptr = db->data + db->size;
@@ -59,7 +64,7 @@ inline uint32_t dbuf_offset(dbuf_t *db, void *ptr)
 	return (uint32_t) (ptr - db->data);
 }
 
-inline void *dbuf_retrive(dbuf_t *db, uint32_t offset)
+inline void *dbuf_get(dbuf_t *db, uint32_t offset)
 {
 	return db->data + offset;
 }
